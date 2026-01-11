@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from config import Config
 from sqlalchemy import text
 from models import Animal, Shelter, db
-import os
+
 
 
 load_dotenv()
