@@ -1,11 +1,13 @@
 from flask import Flask, request
-from config import Config
 from dotenv import load_dotenv
+from config import Config
 from sqlalchemy import text
 from models import Animal, Shelter, db
+import os
 
 
 load_dotenv()
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
