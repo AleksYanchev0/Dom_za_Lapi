@@ -1,9 +1,10 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 from config import Config
 from sqlalchemy import text
 from models import Animal, Shelter, db, Report
+
 
 
 
@@ -15,7 +16,7 @@ app.config.from_object(Config)
 
 db.init_app(app)
 
-migrate = Migrate(app, db)
+# migrate = Migrate(app, db)
 
 @app.route("/")
 def home():
@@ -175,7 +176,7 @@ def get_shelter(shelter_id):
 
 @app.route("/reports", methods = ["GET"])
 def get_reports():
-    reports = Report.query.all()
+    '''reports = Report.query.all()
 
     result = []
     for report in reports:
@@ -185,21 +186,25 @@ def get_reports():
             "created_at": report.created_at.strftime("%Y-%m-%d %H:%M:%S"),
             "status": report.status,
             "user_id": report.user_id
-        })
-
-    return {
+        }) '''
+    return render_template("templates/login.html")
+    '''return {
         "success": True,
         "count": len(result),
         "data": result
     }
-
+'''
 
 @app.route("/reports", methods=["POST"])
-def create_report():
+def handle_report():
     data = request.get_json()
 
     if not data:
         return {"success": False, "error": "Missing JSON body"}, 400
+    ''' if data["command"]=="login"):
+        login()
+    elif data["command"]=="register":
+              register() '''
 
     report = Report(
         text=data["text"],
