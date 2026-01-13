@@ -33,7 +33,8 @@ class Report(db.Model):
     __tablename__ = "reports"
     
     id = db.Column(db.Integer, primary_key = True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     text = db.Column(db.Text, nullable = False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     status = db.Column(db.String(50), default='pending')
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))

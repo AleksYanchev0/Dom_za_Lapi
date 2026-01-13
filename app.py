@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from dotenv import load_dotenv
 from config import Config
 from sqlalchemy import text
-from models import Animal, Shelter, db
+from models import Animal, Shelter, db, Report
 
 
 
@@ -135,8 +135,92 @@ def create_shelter():
         }
         
     }, 201
+
+@app.route("/shelters", methods = ["GET"])
+def get_shelters():
+    shelters = Shelter.query.all()
     
+    result = []
+    for shelter in shelters:
+        result.append({
+            "id": shelter.id,
+            "name": shelter.name,
+            "city": shelter.city
+        })
+        
+    return {
+        "success": True,
+        "count": len(result),
+        "data": result
+    }
+
+@app.route("/shelters/<int:shelter_id>", methods = ["GET"])
+def get_shelter(shelter_id):
+    shelter = Shelter.query.get(shelter_id)
+
+    if shelter is None:
+        return {
+            "success": False,
+            "error": "Shelter not found!"
+        }, 404
     
+    return {
+        "success": True,
+        "data": {
+            "id": shelter.id,
+            "name": shelter.name,
+            "city": shelter.city
+        }
+    }, 200
+
+@app.route("/reports", methods = ["GET"])
+def get_reports():
+    reports = Report.query.all()
+
+    result = []
+    for report in reports:
+        result.append({
+            "id": report.id,
+            "text": report.text,
+            "created_at": report.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "status": report.status,
+            "user_id": report.user_id
+        })
+
+    return {
+        "success": True,
+        "count": len(result),
+        "data": result
+    }
+
+
+@app.route("/reports", methods=["POST"])
+def create_report():
+    data = request.get_json()
+
+    if not data:
+        return {"success": False, "error": "Missing JSON body"}, 400
+
+    report = Report(
+        text=data["text"],
+        user_id=data["user_id"]
+        
+    )
+
+    db.session.add(report)
+    db.session.commit()
+
+    return {
+        "success": True,
+        "data": {
+            "id": report.id,
+            "text": report.text,
+            "status": report.status,
+            "created_at": report.created_at  
+        }
+    }, 201
+
+
 if __name__ == "__main__":
 
     app.run(
