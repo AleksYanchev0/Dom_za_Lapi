@@ -1,10 +1,10 @@
 from flask import Flask, request, render_template
 from flask_migrate import Migrate
 from dotenv import load_dotenv
-from sqlalchemy import text
-
+from flask_jwt_extended import create_access_token
 from config import Config
-from models import db, Animal, Shelter, Report
+from models import db, Animal, Shelter, Report, User
+
 
 load_dotenv()
 
@@ -17,14 +17,7 @@ migrate = Migrate(app, db)
 
 @app.route("/")
 def home():
-    return "Dom za Lapi is running"
-
-
-@app.route("/db-test")
-def db_test():
-    db.session.execute(text("SELECT 1"))
-    return "Database works!"
-
+    return render_template("home.html")
 
 @app.route("/shelters", methods=["GET"])
 def get_shelters():
@@ -254,7 +247,83 @@ def create_report():
         }
     }, 201
 
-
+@app.route("/auth/register", methods = ["POST"])
+def register():
+    data = request.get_json()
+    
+    if not data:
+        return {"success": False, "error": "Missing JSON body"}, 400
+    
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")
+    role = data.get("role", "user")
+    
+    if not username or not email or not password:
+        return {
+            "success": False,
+            "error": "Username, email and password are required"
+        }, 400
+        
+    if User.query.filter(
+        (User.username == username) | (User.email == email)
+    ).first():
+        return {
+            "success": False,
+            "error": "Username or email already exists"
+        }, 409
+    
+    user = User(
+        username=username,
+        email=email,
+        role = role
+    )
+    user.set_password(password)
+    
+    db.session.add(user)
+    db.session.commit()
+    
+    return {
+        "success": True,
+        "message": "User registered successfully"
+    }, 201
+    
+@app.route("/auth/login", methods=["POST"])
+def login():
+    
+    data = request.get_json()
+    
+    if not data:
+        return {"success": False, "error": "Missing JSON body"}, 400
+    
+    email = data.get("email")
+    password = data.get("password")
+    
+    if not email or not password:
+        return {"success": False, "error": "Email and password required"}, 400
+    
+    user = User.query.filter_by(email=email).first()
+    
+    if not user or not user.check_password(password):
+        return {"success": False, "error": "Invalid credentials"}, 401
+    
+    access_token = create_access_token(identity={
+        "id": user.id,
+        "role": user.role
+    })
+        
+    return {
+        "success": True,
+        "access_token": access_token,
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "role": user.role
+        }
+        
+    }
+        
 if __name__ == "__main__":
     app.run(
         host="127.0.0.1",

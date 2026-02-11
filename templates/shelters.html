@@ -1,11 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Приюти{% endblock %}
+
+{% block content %}
+<h1>Списък на приютите</h1>
+
+{% for shelter in shelters %}
+    <div class="card">
+        <h3>{{ shelter.name }}</h3>
+        <p>Град: {{ shelter.city }}</p>
+        <a href="/shelters/{{ shelter.id }}?view=html">
+            Виж детайли →
+        </a>
+    </div>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Dom za Lapi{% endblock %}</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Основен стил за навигацията */
+        .navbar {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr; /* Разделя на 3 равни части */
+            align-items: center;
+            padding: 0 40px;
+            background-color: #27ae60; /* Красиво зелено */
+            color: white;
+            height: 70px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Лого (ляво) */
+        .nav-logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+        }
+
+        /* Центрирани линкове */
+        .nav-center {
+            display: flex;
+            gap: 30px;
+        }
+
+        /* Влизане (дясно) */
+        .nav-right {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Стилизиране на всички линкове в навигацията */
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .navbar a:hover {
+            opacity: 0.8;
+            text-decoration: none;
+        }
+
+        /* Специален стил за бутона Влизане (опционално) */
+        .login-btn {
+            border: 1px solid white;
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+
+        .login-btn:hover {
+            background-color: white;
+            color: #27ae60 !important;
+        }
+
+        .container {
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="nav-logo">🐾 Dom za Lapi</a>
+        </div>
+
+        <div class="nav-center">
+            <a href="/animals?view=html">Животни</a>
+            <a href="/shelters?view=html">Приюти</a>
+            <a href="/reports?view=html">Сигнали</a>
+        </div>
+
+        <div class="nav-right">
+            <a href="/login" class="login-btn">Влизане</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>
+

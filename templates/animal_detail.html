@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ animal.name }}{% endblock %}
+
+{% block content %}
+<h1>{{ animal.name }}</h1>
+<p>Вид: {{ animal.species }}</p>
+
+<a href="/shelters/{{ animal.shelter_id }}?view=html">
+    Виж приюта →
+</a>
+{% endblock %}

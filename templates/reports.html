@@ -1,11 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Сигнали{% endblock %}
+
+{% block content %}
+<h1>Сигнали</h1>
+
+<ul>
+    {% for report in reports %}
+        <li>
+            {{ report.text }} <br>
+            Статус: {{ report.status }} <br>
+            Дата: {{ report.created_at }}
+        </li>
+        <hr>
+    {% endfor %}
+</ul>
+{% endblock %}

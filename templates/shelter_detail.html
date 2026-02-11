@@ -1,15 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Животни{% endblock %}
+{% block title %}{{ shelter.name }}{% endblock %}
 
 {% block content %}
-<h1>Всички животни</h1>
+<a href="/shelters?view=html">← Назад</a>
+
+<h1>Приют: {{ shelter.name }}</h1>
+<p>Град: {{ shelter.city }}</p>
+
+<h2>Животни в този приют</h2>
 
 {% if animals %}
     <ul>
         {% for animal in animals %}
             <li>
-                <strong>{{ animal.name }}</strong>
-                ({{ animal.species }})
+                {{ animal.name }} ({{ animal.species }})
                 <a href="/animals/{{ animal.id }}?view=html">Детайли</a>
             </li>
         {% endfor %}
@@ -18,4 +22,5 @@
     <p>Няма регистрирани животни.</p>
 {% endif %}
 {% endblock %}
+
 
