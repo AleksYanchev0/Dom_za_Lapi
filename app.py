@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 from flask_migrate import Migrate
 from dotenv import load_dotenv
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from config import Config
 from models import db, Animal, Shelter, Report, User
 
@@ -14,6 +14,7 @@ app.config.from_object(Config)
 db.init_app(app)
 migrate = Migrate(app, db)
 
+jwt = JWTManager(app)
 
 @app.route("/")
 def home():
@@ -21,7 +22,7 @@ def home():
 
 @app.route("/shelters", methods=["GET"])
 def get_shelters():
-    shelters = Shelter.query.all()
+    shelters = Shelter.query.filter_by(is_approved=True).all()
 
     if request.args.get("view") == "html":
         return render_template(
@@ -42,6 +43,10 @@ def get_shelters():
         "count": len(result),
         "data": result
     }
+
+@app.route("/shelters/register", methods=["GET"])
+def get_shelter_register():
+    return render_template("shelter_registration.html")
 
 
 @app.route("/shelters/<int:shelter_id>", methods=["GET"])
@@ -87,8 +92,14 @@ def create_shelter():
 
     if "name" not in data or "city" not in data:
         return {"success": False, "error": "Missing required fields"}, 400
+    
+    user = User(email=data["email"], role="shelter")
+    user.set_password(data["password"])
+    
+    db.session.add(user)
+    db.session.flush()
 
-    shelter = Shelter(name=data["name"], city=data["city"])
+    shelter = Shelter(name=data["name"], city=data["city"], owner_id = user.id)
     db.session.add(shelter)
     db.session.commit()
 
@@ -163,15 +174,25 @@ def get_animal(animal_id):
 
 
 @app.route("/animals", methods=["POST"])
+@jwt_required()
 def create_animal():
     data = request.get_json()
 
+    data_token = get_jwt_identity()
+    
     if not data:
         return {"success": False, "error": "Missing JSON body"}, 400
 
+    if data_token["role"] not in ["user", "shelter"]:
+        return {"success": False, "error": "Not allowed to add animals"}, 403
+    
     required = ["name", "species", "shelter_id"]
     if not all(field in data for field in required):
         return {"success": False, "error": "Missing required fields"}, 400
+
+    
+    #Ако потребител добави ще бъде None
+    shelter_id = data.get("shelter_id")
 
     animal = Animal(
         name=data["name"],
@@ -246,6 +267,15 @@ def create_report():
             "created_at": report.created_at.isoformat()
         }
     }, 201
+    
+    
+@app.route("/login", methods=["GET"])
+def login_page():
+    return render_template("login.html")
+
+@app.route("/register", methods=["GET"])
+def register_page():
+    return render_template("register.html")
 
 @app.route("/auth/register", methods = ["POST"])
 def register():
@@ -305,7 +335,7 @@ def login():
     user = User.query.filter_by(email=email).first()
     
     if not user or not user.check_password(password):
-        return {"success": False, "error": "Invalid credentials"}, 401
+        return {"success": False, "error": "Невалидни данни"}, 401
     
     access_token = create_access_token(identity={
         "id": user.id,

@@ -1,17 +1,120 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <form action="/reports" method="post">
-  <label for="fname">First name:</label><br>
-  <input type="text" id="fname" name="fname"><br>
-  <input type="hidden" name="command" value="login">
-  <label for="lname">Last name:</label><br>
-  <input type="text" id="lname" name="lname">
-</form>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Влизане{% endblock %}
+
+{% block content %}
+<style>
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 60px;
+    }
+
+    .auth-card {
+        width: 400px;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    .auth-card h2 {
+        text-align: center;
+        color: #27ae60;
+        margin-bottom: 25px;
+    }
+
+    .auth-card label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+    }
+
+    .auth-card input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 18px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    .auth-card button {
+        width: 100%;
+        padding: 12px;
+        background-color: #27ae60;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .auth-card button:hover {
+        background-color: #219150;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .auth-footer a {
+        color: #27ae60;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .error {
+        color: red;
+        text-align: center;
+        margin-top: 10px;
+    }
+</style>
+
+<section class="auth-wrapper">
+    <article class="auth-card">
+        <h2>Влизане</h2>
+
+        <form id="loginForm">
+            <label for="email">Имейл</label>
+            <input type="email" id="email" required>
+
+            <label for="password">Парола</label>
+            <input type="password" id="password" required>
+
+            <button type="submit">Влез</button>
+        </form>
+
+        <p id="error" class="error"></p>
+
+        <div class="auth-footer">
+            <p>Нямаш акаунт? <a href="/register">Регистрация</a></p>
+        </div>
+    </article>
+</section>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const res = await fetch("/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            email: email.value,
+            password: password.value
+        })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        document.getElementById("error").innerText = data.error;
+        return;
+    }
+
+    localStorage.setItem("access_token", data.access_token);
+    window.location.href = "/";
+});
+</script>
+{% endblock %}

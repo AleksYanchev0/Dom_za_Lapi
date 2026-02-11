@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<style>
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 60px;
+    }
+
+    .auth-card {
+        width: 420px;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    .auth-card h2 {
+        text-align: center;
+        color: #27ae60;
+        margin-bottom: 25px;
+    }
+
+    .auth-card label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+    }
+
+    .auth-card input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 18px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    .auth-card button {
+        width: 100%;
+        padding: 12px;
+        background-color: #27ae60;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .auth-card button:hover {
+        background-color: #219150;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .auth-footer a {
+        color: #27ae60;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .error {
+        color: red;
+        text-align: center;
+        margin-top: 10px;
+    }
+</style>
+
+<section class="auth-wrapper">
+    <article class="auth-card">
+        <h2>Регистрация</h2>
+
+        <form id="registerForm">
+            <label for="username">Потребителско име</label>
+            <input type="text" id="username" required>
+
+            <label for="email">Имейл</label>
+            <input type="email" id="email" required>
+
+            <label for="password">Парола</label>
+            <input type="password" id="password" required>
+
+            <button type="submit">Регистрирай се</button>
+        </form>
+
+        <p id="error" class="error"></p>
+
+        <div class="auth-footer">
+            <p>Вече имаш акаунт? <a href="/login">Влизане</a></p>
+        </div>
+    </article>
+</section>
+
+<script>
+document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const res = await fetch("/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            username: username.value,
+            email: email.value,
+            password: password.value
+        })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        document.getElementById("error").innerText = data.error;
+        return;
+    }
+
+    window.location.href = "/login";
+});
+</script>
+{% endblock %}
