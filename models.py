@@ -28,7 +28,7 @@ class Shelter(db.Model):
     name = db.Column(db.String(150), nullable = False)
     city = db.Column(db.String(30), nullable = False)
     
-    owner_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     is_approved = db.Column(db.Boolean, default=False)
     
     animals = db.relationship("Animal", backref="shelter", lazy=True)

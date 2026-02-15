@@ -1,11 +1,182 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Регистрация на приют{% endblock %}
+
+{% block content %}
+
+<style>
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 60px;
+    }
+
+    .auth-card {
+        width: 450px;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    .auth-card h2 {
+        text-align: center;
+        color: #27ae60;
+        margin-bottom: 25px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .auth-card label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+    }
+
+    .auth-card input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    .auth-card button {
+        width: 100%;
+        padding: 12px;
+        background-color: #27ae60;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .auth-card button:hover {
+        background-color: #219150;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .auth-footer a {
+        color: #27ae60;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .error {
+        color: red;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .success {
+        color: #27ae60;
+        text-align: center;
+        margin-top: 10px;
+    }
+</style>
+
+<section class="auth-wrapper">
+    <article class="auth-card">
+        <h2>Регистрация на приют</h2>
+
+        <form id="shelterForm">
+
+            <div class="form-group">
+                <label for="name">Име на приюта</label>
+                <input type="text" id="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="city">Град</label>
+                <input type="text" id="city" required>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Име на потребител</label>
+                <input type="text" id="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Имейл</label>
+                <input type="email" id="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Парола</label>
+                <input type="password" id="password" required>
+            </div>
+
+            <button type="submit">Регистрирай приют</button>
+        </form>
+
+        <p id="error" class="error"></p>
+        <p id="success" class="success"></p>
+
+        <div class="auth-footer">
+            <p>Искаш стандартен акаунт?
+                <a href="{{ url_for('register_page') }}">Регистрирай се тук.</a>
+            </p>
+        </div>
+    </article>
+</section>
+
+<script>
+document.getElementById("shelterForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const city = document.getElementById("city").value.trim();
+    const username = document.getElementById("username").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    const errorElement = document.getElementById("error");
+    const successElement = document.getElementById("success");
+
+    errorElement.innerText = "";
+    successElement.innerText = "";
+
+    if (!name || !city || !email || !password || !username) {
+        errorElement.innerText = "Всички полета са задължителни.";
+        return;
+    }
+
+    try {
+        const res = await fetch("{{ url_for('create_shelter') }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: name,
+                city: city,
+                username: username,
+                email: email,
+                password: password
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            errorElement.innerText = data.error || "Възникна грешка.";
+            return;
+        }
+
+        successElement.innerText = "Приютът беше регистриран успешно!";
+
+        setTimeout(() => {
+            window.location.href = "{{ url_for('login_page') }}";
+        }, 1500);
+
+    } catch (err) {
+        errorElement.innerText = "Сървърна грешка.";
+    }
+});
+</script>
+
+{% endblock %}

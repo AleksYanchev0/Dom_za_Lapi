@@ -89,11 +89,16 @@ def create_shelter():
 
     if not data:
         return {"success": False, "error": "Missing JSON body"}, 400
-
-    if "name" not in data or "city" not in data:
+    
+    required = ["name", "city", "email", "password", "username"]
+    
+    if not all(field in data and data[field].strip() for field in required):
         return {"success": False, "error": "Missing required fields"}, 400
     
-    user = User(email=data["email"], role="shelter")
+    if User.query.filter_by(email=data["email"]).first():
+        return {"success": False, "error": "Email already exist"}, 400
+    
+    user = User(email=data["email"],username=data["username"], role="shelter")
     user.set_password(data["password"])
     
     db.session.add(user)
