@@ -1,18 +1,167 @@
 {% extends "base.html" %}
-
-{% block title %}Сигнали{% endblock %}
+{% block title %}Подай сигнал{% endblock %}
 
 {% block content %}
-<h1>Сигнали</h1>
 
-<ul>
-    {% for report in reports %}
-        <li>
-            {{ report.text }} <br>
-            Статус: {{ report.status }} <br>
-            Дата: {{ report.created_at }}
-        </li>
-        <hr>
-    {% endfor %}
-</ul>
+<style>
+.report-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.report-card {
+    width: 550px;
+    background: white;
+    padding: 35px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+.report-card h2 {
+    margin-top: 0;
+    color: #27ae60;
+    font-size: 22px;
+}
+
+.report-card p.subtitle {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+.report-card input,
+.report-card textarea,
+.report-card select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.report-card textarea {
+    height: 150px;
+    resize: vertical;
+}
+
+.report-card button {
+    width: 100%;
+    padding: 12px;
+    background: #27ae60;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.report-card button:hover {
+    background: #219150;
+}
+
+.error {
+    color: red;
+    text-align: center;
+    font-size: 14px;
+}
+
+.success-box {
+    display: none;
+    background: #eafaf1;
+    border: 1px solid #27ae60;
+    color: #27ae60;
+    padding: 15px;
+    border-radius: 6px;
+    text-align: center;
+    margin-top: 15px;
+}
+</style>
+
+<div class="report-wrapper">
+    <div class="report-card">
+        <h2>🚨 Подай сигнал</h2>
+        <p class="subtitle">Използвай тази форма за да сигнализираш за насилие над животни, изоставено животно или друг проблем.</p>
+
+        <form id="reportForm">
+            <select id="category">
+                <option value="" disabled selected>Категория на сигнала</option>
+                <option value="насилие">Насилие над животно</option>
+                <option value="изоставено">Изоставено животно</option>
+                <option value="болно">Болно/ранено животно</option>
+                <option value="друго">Друго</option>
+            </select>
+
+            <input type="text" id="location" placeholder="Местоположение (ул., град...)" />
+
+            <textarea id="text" placeholder="Опиши ситуацията подробно..."></textarea>
+
+            <button type="submit">Изпрати сигнал</button>
+        </form>
+
+        <p id="error" class="error"></p>
+        <div id="successBox" class="success-box">
+            ✅ Сигналът беше изпратен успешно! Ще бъде разгледан от екипа ни.
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById("reportForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        alert("Трябва да сте логнати за да подадете сигнал.");
+        window.location.href = "/login";
+        return;
+    }
+
+    const category = document.getElementById("category").value;
+    const location = document.getElementById("location").value;
+    const text = document.getElementById("text").value.trim();
+
+    if (!text) {
+        document.getElementById("error").innerText = "Моля опишете ситуацията.";
+        return;
+    }
+
+    const fullText = category
+        ? `[${category}] ${location ? location + " - " : ""}${text}`
+        : text;
+
+    const res = await fetch("/reports", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ text: fullText })
+    });
+
+    if (res.status === 401 || res.status === 422) {
+        alert("Сесията е изтекла. Моля влезте отново.");
+        localStorage.removeItem("access_token");
+        window.location.href = "/login";
+        return;
+    }
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        document.getElementById("error").innerText = data.error;
+        return;
+    }
+
+    document.getElementById("reportForm").reset();
+    document.getElementById("error").innerText = "";
+    document.getElementById("successBox").style.display = "block";
+});
+</script>
+
 {% endblock %}

@@ -182,12 +182,17 @@ def get_animal(animal_id):
 @jwt_required()
 def create_animal():
     data = request.get_json()
-    current_user = get_jwt_identity()
+    user_id = get_jwt_identity()
+
+    user = User.query.get(int(user_id))
+
+    if not user:
+        return {"success": False, "error": "User not found"}, 404
 
     if not data:
         return {"success": False, "error": "Missing JSON body"}, 400
 
-    if current_user["role"] not in ["user", "shelter"]:
+    if user.role not in ["user", "shelter"]:
         return {"success": False, "error": "Not allowed to add animals"}, 403
 
     name = data.get("name")
@@ -196,11 +201,10 @@ def create_animal():
     if not name or not species:
         return {"success": False, "error": "Missing required fields"}, 400
 
-    # Ако е shelter автоматично взимаме неговия shelter
     shelter_id = None
 
-    if current_user["role"] == "shelter":
-        shelter = Shelter.query.filter_by(owner_id=current_user["id"]).first()
+    if user.role == "shelter":
+        shelter = Shelter.query.filter_by(owner_id=user.id).first()
         if shelter:
             shelter_id = shelter.id
 
@@ -223,6 +227,7 @@ def create_animal():
         }
     }, 201
 
+   
 
 @app.route("/animals/add")
 def add_animal_page():
@@ -255,18 +260,17 @@ def get_reports():
 
 
 @app.route("/reports", methods=["POST"])
+@jwt_required()
 def create_report():
     data = request.get_json()
+    user_id = get_jwt_identity()
 
-    if not data:
-        return {"success": False, "error": "Missing JSON body"}, 400
-
-    if "text" not in data or "user_id" not in data:
+    if not data or "text" not in data:
         return {"success": False, "error": "Missing required fields"}, 400
 
     report = Report(
         text=data["text"],
-        user_id=data["user_id"]
+        user_id=int(user_id)
     )
 
     db.session.add(report)
@@ -334,7 +338,6 @@ def register():
     
 @app.route("/auth/login", methods=["POST"])
 def login():
-    
     data = request.get_json()
     
     if not data:
@@ -351,11 +354,8 @@ def login():
     if not user or not user.check_password(password):
         return {"success": False, "error": "Невалидни данни"}, 401
     
-    access_token = create_access_token(identity={
-        "id": user.id,
-        "role": user.role
-    })
-        
+    access_token = create_access_token(identity=str(user.id))
+    
     return {
         "success": True,
         "access_token": access_token,
@@ -365,7 +365,6 @@ def login():
             "email": user.email,
             "role": user.role
         }
-        
     }
         
 if __name__ == "__main__":
