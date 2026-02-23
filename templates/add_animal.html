@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Добавяне на животно{% endblock %}
+
+{% block content %}
+
+<style>
+.form-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.form-card {
+    width: 400px;
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+.form-card input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.form-card button {
+    width: 100%;
+    padding: 10px;
+    background: #27ae60;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+}
+
+.error {
+    color: red;
+    text-align: center;
+}
+</style>
+
+<div class="form-wrapper">
+    <div class="form-card">
+        <h2>Добави животно</h2>
+
+        <form id="animalForm">
+            <input type="text" id="name" placeholder="Име" required>
+            <input type="text" id="species" placeholder="Вид" required>
+            <button type="submit">Добави</button>
+        </form>
+
+        <p id="error" class="error"></p>
+    </div>
+</div>
+
+<script>
+document.getElementById("animalForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        alert("Трябва да сте логнати.");
+        window.location.href = "/login";
+        return;
+    }
+
+    const res = await fetch("/animals", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+            name: document.getElementById("name").value,
+            species: document.getElementById("species").value
+        })
+    });
+
+    const data = await res.json();
+
+    if (res.status === 401 || res.status === 422) {
+        alert("Сесията е изтекла. Моля влезте отново.");
+        localStorage.removeItem("access_token");
+        window.location.href = "/login";
+        return;
+    }
+
+    if (!res.ok) {
+        document.getElementById("error").innerText = data.error;
+        return;
+    }
+
+    window.location.href = "/animals?view=html";
+});
+</script>
+
+{% endblock %}
+

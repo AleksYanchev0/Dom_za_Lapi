@@ -2,20 +2,87 @@
 {% block title %}Животни{% endblock %}
 
 {% block content %}
-<h1>Всички животни</h1>
 
-{% if animals %}
-    <ul>
+<style>
+.animals-container {
+    max-width: 900px;
+    margin: 40px auto;
+}
+
+.animals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.animals-header h2 {
+    margin: 0;
+}
+
+.add-btn {
+    background-color: #27ae60;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.add-btn:hover {
+    background-color: #219150;
+}
+
+.animal-card {
+    background: white;
+    padding: 18px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.animal-card strong {
+    font-size: 18px;
+}
+</style>
+
+<section class="animals-container">
+
+    <div class="animals-header">
+        <h2>Всички животни</h2>
+
+       
+        <a href="/animals/add" id="addAnimalBtn" class="add-btn">
+            + Добави животно
+        </a>
+    </div>
+
+    {% if animals %}
         {% for animal in animals %}
-            <li>
-                <strong>{{ animal.name }}</strong>
-                ({{ animal.species }})
-                <a href="/animals/{{ animal.id }}?view=html">Детайли</a>
-            </li>
+            <div class="animal-card">
+                <strong>{{ animal.name }}</strong><br>
+                Вид: {{ animal.species }}
+            </div>
         {% endfor %}
-    </ul>
-{% else %}
-    <p>Няма регистрирани животни.</p>
-{% endif %}
+    {% else %}
+        <p>Няма добавени животни.</p>
+    {% endif %}
+
+</section>
+
+<script>
+
+document.getElementById("addAnimalBtn").addEventListener("click", function(e) {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        e.preventDefault();
+        alert("Трябва да сте логнати, за да добавите животно.");
+        window.location.href = "/login";
+    }
+});
+</script>
+
 {% endblock %}
 

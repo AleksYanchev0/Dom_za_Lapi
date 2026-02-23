@@ -182,27 +182,32 @@ def get_animal(animal_id):
 @jwt_required()
 def create_animal():
     data = request.get_json()
+    current_user = get_jwt_identity()
 
-    data_token = get_jwt_identity()
-    
     if not data:
         return {"success": False, "error": "Missing JSON body"}, 400
 
-    if data_token["role"] not in ["user", "shelter"]:
+    if current_user["role"] not in ["user", "shelter"]:
         return {"success": False, "error": "Not allowed to add animals"}, 403
-    
-    required = ["name", "species", "shelter_id"]
-    if not all(field in data for field in required):
+
+    name = data.get("name")
+    species = data.get("species")
+
+    if not name or not species:
         return {"success": False, "error": "Missing required fields"}, 400
 
-    
-    #Ако потребител добави ще бъде None
-    shelter_id = data.get("shelter_id")
+    # Ако е shelter автоматично взимаме неговия shelter
+    shelter_id = None
+
+    if current_user["role"] == "shelter":
+        shelter = Shelter.query.filter_by(owner_id=current_user["id"]).first()
+        if shelter:
+            shelter_id = shelter.id
 
     animal = Animal(
-        name=data["name"],
-        species=data["species"],
-        shelter_id=data["shelter_id"]
+        name=name,
+        species=species,
+        shelter_id=shelter_id
     )
 
     db.session.add(animal)
@@ -218,6 +223,10 @@ def create_animal():
         }
     }, 201
 
+
+@app.route("/animals/add")
+def add_animal_page():
+    return render_template("add_animal.html")
 
 @app.route("/reports", methods=["GET"])
 def get_reports():
