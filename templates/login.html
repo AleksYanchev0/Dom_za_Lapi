@@ -124,6 +124,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
         localStorage.removeItem("access_token");
 
         localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("user", JSON.stringify(data.user));
 
         console.log("Token saved:", localStorage.getItem("access_token"));
 

@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block title %}Админ - Приюти{% endblock %}
+
+{% block content %}
+
+<style>
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.admin-header h2 {
+    color: #27ae60;
+    margin: 0;
+}
+
+.badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.badge-pending {
+    background: #fef9e7;
+    color: #d4ac0d;
+    border: 1px solid #d4ac0d;
+}
+
+.badge-approved {
+    background: #eafaf1;
+    color: #27ae60;
+    border: 1px solid #27ae60;
+}
+
+.shelter-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.shelter-table th {
+    background: #27ae60;
+    color: white;
+    padding: 14px 20px;
+    text-align: left;
+    font-weight: 500;
+}
+
+.shelter-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.shelter-table tr:last-child td {
+    border-bottom: none;
+}
+
+.shelter-table tr:hover td {
+    background: #f9f9f9;
+}
+
+.btn {
+    padding: 7px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.btn:hover {
+    opacity: 0.85;
+}
+
+.btn-approve {
+    background: #27ae60;
+    color: white;
+    margin-right: 8px;
+}
+
+.btn-decline {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-disabled {
+    background: #ccc;
+    color: white;
+    cursor: default;
+}
+
+.no-access {
+    text-align: center;
+    margin-top: 80px;
+    color: #e74c3c;
+    font-size: 18px;
+}
+
+#loadingMsg {
+    text-align: center;
+    color: #888;
+    margin-top: 40px;
+}
+</style>
+
+<div id="accessDenied" class="no-access" style="display:none;">
+    ⛔ Нямате достъп до тази страница.
+</div>
+
+<div id="adminPanel" style="display:none;">
+    <div class="admin-header">
+        <h2>🏠 Управление на приюти</h2>
+    </div>
+
+    <p id="loadingMsg">Зареждане...</p>
+
+    <table class="shelter-table" id="shelterTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Име</th>
+                <th>Град</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="shelterBody"></tbody>
+    </table>
+</div>
+
+<script>
+const token = localStorage.getItem("access_token");
+const user = JSON.parse(localStorage.getItem("user") || "null");
+
+if (!token || !user || user.role !== "admin") {
+    document.getElementById("accessDenied").style.display = "block";
+} else {
+    document.getElementById("adminPanel").style.display = "block";
+    loadShelters();
+}
+
+async function loadShelters() {
+    const res = await fetch("/admin/shelters", {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    const data = await res.json();
+    document.getElementById("loadingMsg").style.display = "none";
+
+    if (!res.ok) {
+        document.getElementById("accessDenied").style.display = "block";
+        document.getElementById("adminPanel").style.display = "none";
+        return;
+    }
+
+    const tbody = document.getElementById("shelterBody");
+    tbody.innerHTML = "";
+
+    data.data.forEach(shelter => {
+        const row = document.createElement("tr");
+        row.id = `row-${shelter.id}`;
+        row.innerHTML = `
+            <td>${shelter.id}</td>
+            <td>${shelter.name}</td>
+            <td>${shelter.city}</td>
+            <td>
+                <span class="badge ${shelter.is_approved ? 'badge-approved' : 'badge-pending'}">
+                    ${shelter.is_approved ? '✅ Одобрен' : '⏳ Чака одобрение'}
+                </span>
+            </td>
+            <td>
+                ${!shelter.is_approved ? `
+                    <button class="btn btn-approve" onclick="approveShelter(${shelter.id})">Одобри</button>
+                    <button class="btn btn-decline" onclick="declineShelter(${shelter.id})">Откажи</button>
+                ` : `
+                    <button class="btn btn-disabled" disabled>Вече одобрен</button>
+                `}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    document.getElementById("shelterTable").style.display = "table";
+}
+
+async function approveShelter(id) {
+    const res = await fetch(`/shelters/${id}/approve`, {
+        method: "PATCH",
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (res.ok) {
+        const badge = document.querySelector(`#row-${id} .badge`);
+        badge.className = "badge badge-approved";
+        badge.innerText = "✅ Одобрен";
+
+        const td = document.querySelector(`#row-${id} td:last-child`);
+        td.innerHTML = `<button class="btn btn-disabled" disabled>Вече одобрен</button>`;
+    }
+}
+
+async function declineShelter(id) {
+    if (!confirm("Сигурни ли сте, че искате да откажете този приют?")) return;
+
+    const res = await fetch(`/shelters/${id}/decline`, {
+        method: "PATCH",
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (res.ok) {
+        document.getElementById(`row-${id}`).remove();
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,17 +1,17 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
+
 db = SQLAlchemy()
 
 class User(db.Model):
     __tablename__ = "users"
     
-    id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(40), unique = True, nullable = False)
-    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(40), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    email = db.Column(db.String(120), unique = True, nullable = False)
-    role = db.Column(db.String(20), default = "user")
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    role = db.Column(db.String(20), default="user")
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     reports = db.relationship('Report', backref='user', lazy=True)
     
@@ -20,35 +20,46 @@ class User(db.Model):
         
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-    
+
+
 class Shelter(db.Model):
     __tablename__ = "shelters"
     
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(150), nullable = False)
-    city = db.Column(db.String(30), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    city = db.Column(db.String(30), nullable=False)
+    phone = db.Column(db.String(20), nullable=True)
+    email = db.Column(db.String(120), nullable=True)
+    photo_url = db.Column(db.String(500), nullable=True)
     
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     is_approved = db.Column(db.Boolean, default=False)
     
     animals = db.relationship("Animal", backref="shelter", lazy=True)
-    
+
+
 class Animal(db.Model):
     __tablename__ = "animals"
     
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(40))
     species = db.Column(db.String(50), nullable=False)
+    breed = db.Column(db.String(100), nullable=True)
+    age = db.Column(db.String(20), nullable=True)        # puppy / young / adult / senior
+    size = db.Column(db.String(20), nullable=True)       # small / medium / large
+    gender = db.Column(db.String(10), nullable=True)     # male / female
+    status = db.Column(db.String(30), default="available")  # available / adopted / in treatment
+    vaccinated = db.Column(db.Boolean, default=False)
+    photo_url = db.Column(db.String(500), nullable=True)
     
     shelter_id = db.Column(db.Integer, db.ForeignKey("shelters.id"))
-    
-    
+
+
 class Report(db.Model):
     __tablename__ = "reports"
     
-    id = db.Column(db.Integer, primary_key = True)
-    text = db.Column(db.Text, nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     status = db.Column(db.String(50), default='pending')
-
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
