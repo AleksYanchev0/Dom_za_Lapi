@@ -2,25 +2,171 @@
 {% block title %}{{ shelter.name }}{% endblock %}
 
 {% block content %}
-<a href="/shelters?view=html">← Назад</a>
 
-<h1>Приют: {{ shelter.name }}</h1>
-<p>Град: {{ shelter.city }}</p>
+<style>
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #27ae60;
+    text-decoration: none;
+    font-weight: 500;
+}
 
-<h2>Животни в този приют</h2>
+.shelter-header {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
 
-{% if animals %}
-    <ul>
-        {% for animal in animals %}
-            <li>
-                {{ animal.name }} ({{ animal.species }})
-                <a href="/animals/{{ animal.id }}?view=html">Детайли</a>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Няма регистрирани животни.</p>
-{% endif %}
+.shelter-photo {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.shelter-photo-placeholder {
+    width: 100%;
+    height: 200px;
+    background: #eafaf1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 70px;
+}
+
+.shelter-info {
+    padding: 25px 30px;
+}
+
+.shelter-info h1 {
+    margin: 0 0 8px;
+    color: #2c3e50;
+}
+
+.shelter-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    color: #666;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.shelter-meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.animals-section h2 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.animal-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.animal-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s;
+}
+
+.animal-card:hover {
+    transform: translateY(-3px);
+}
+
+.animal-card-photo {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+}
+
+.animal-card-placeholder {
+    width: 100%;
+    height: 140px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+}
+
+.animal-card-body {
+    padding: 12px;
+}
+
+.animal-card-body h4 {
+    margin: 0 0 4px;
+    font-size: 15px;
+}
+
+.animal-card-body p {
+    margin: 0;
+    font-size: 13px;
+    color: #888;
+}
+
+.no-animals {
+    color: #888;
+    font-style: italic;
+}
+</style>
+
+<a href="/shelters?view=html" class="back-link">← Назад към приютите</a>
+
+<div class="shelter-header">
+    {% if shelter.photo_url %}
+        <img src="{{ shelter.photo_url }}" alt="{{ shelter.name }}" class="shelter-photo">
+    {% else %}
+        <div class="shelter-photo-placeholder">🏠</div>
+    {% endif %}
+
+    <div class="shelter-info">
+        <h1>{{ shelter.name }}</h1>
+        <div class="shelter-meta">
+            <span>📍 {{ shelter.city }}</span>
+            {% if shelter.phone %}
+                <span>📞 {{ shelter.phone }}</span>
+            {% endif %}
+            {% if shelter.email %}
+                <span>✉️ {{ shelter.email }}</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="animals-section">
+    <h2>Животни в {{ shelter.name }}</h2>
+
+    {% if animals %}
+        <div class="animal-list">
+            {% for animal in animals %}
+                <a href="/animals/{{ animal.id }}?view=html" class="animal-card">
+                    {% if animal.photo_url %}
+                        <img src="{{ animal.photo_url }}" alt="{{ animal.name }}" class="animal-card-photo">
+                    {% else %}
+                        <div class="animal-card-placeholder">🐾</div>
+                    {% endif %}
+                    <div class="animal-card-body">
+                        <h4>{{ animal.name }}</h4>
+                        <p>{{ animal.species }}{% if animal.breed %} · {{ animal.breed }}{% endif %}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-animals">Няма регистрирани животни в този приют.</p>
+    {% endif %}
+</div>
+
 {% endblock %}
-
-

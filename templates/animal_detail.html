@@ -2,10 +2,152 @@
 {% block title %}{{ animal.name }}{% endblock %}
 
 {% block content %}
-<h1>{{ animal.name }}</h1>
-<p>Вид: {{ animal.species }}</p>
 
-<a href="/shelters/{{ animal.shelter_id }}?view=html">
-    Виж приюта →
-</a>
+<style>
+.detail-wrapper {
+    max-width: 700px;
+    margin: 40px auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.animal-photo {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+}
+
+.animal-photo-placeholder {
+    width: 100%;
+    height: 320px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+}
+
+.detail-body {
+    padding: 30px;
+}
+
+.detail-body h1 {
+    margin: 0 0 5px;
+    color: #2c3e50;
+}
+
+.detail-body .species {
+    color: #888;
+    font-size: 15px;
+    margin-bottom: 20px;
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.tag {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    background: #eafaf1;
+    color: #27ae60;
+    border: 1px solid #27ae60;
+}
+
+.tag.grey {
+    background: #f5f5f5;
+    color: #666;
+    border-color: #ddd;
+}
+
+.tag.blue {
+    background: #eaf4fb;
+    color: #2980b9;
+    border-color: #2980b9;
+}
+
+.status-available { background: #eafaf1; color: #27ae60; border-color: #27ae60; }
+.status-adopted { background: #fef9e7; color: #d4ac0d; border-color: #d4ac0d; }
+.status-treatment { background: #fdedec; color: #e74c3c; border-color: #e74c3c; }
+
+.shelter-link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #27ae60;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.shelter-link:hover {
+    background: #219150;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #27ae60;
+    text-decoration: none;
+    font-weight: 500;
+}
+</style>
+
+<a href="/animals?view=html" class="back-link">← Назад към животните</a>
+
+<div class="detail-wrapper">
+
+    {% if animal.photo_url %}
+        <img src="{{ animal.photo_url }}" alt="{{ animal.name }}" class="animal-photo">
+    {% else %}
+        <div class="animal-photo-placeholder">🐾</div>
+    {% endif %}
+
+    <div class="detail-body">
+        <h1>{{ animal.name }}</h1>
+        <p class="species">{{ animal.species }}{% if animal.breed %} · {{ animal.breed }}{% endif %}</p>
+
+        <div class="tags">
+            {% if animal.status == "available" %}
+                <span class="tag status-available">✅ Достъпен за осиновяване</span>
+            {% elif animal.status == "adopted" %}
+                <span class="tag status-adopted">🏠 Осиновен</span>
+            {% elif animal.status == "in treatment" %}
+                <span class="tag status-treatment">🏥 На лечение</span>
+            {% endif %}
+
+            {% if animal.gender %}
+                <span class="tag grey">{{ "♂ Мъжки" if animal.gender == "мъжки" else "♀ Женски" }}</span>
+            {% endif %}
+
+            {% if animal.age %}
+                <span class="tag grey">{{ animal.age }}</span>
+            {% endif %}
+
+            {% if animal.size %}
+                <span class="tag grey">{{ animal.size }}</span>
+            {% endif %}
+
+            {% if animal.vaccinated %}
+                <span class="tag blue">💉 Ваксинирано</span>
+            {% endif %}
+        </div>
+
+        {% if animal.shelter_id %}
+            <a href="/shelters/{{ animal.shelter_id }}?view=html" class="shelter-link">
+                🏠 Виж приюта
+            </a>
+        {% endif %}
+    </div>
+</div>
+
 {% endblock %}

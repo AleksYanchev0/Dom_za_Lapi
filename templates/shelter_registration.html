@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block title %}Регистрация на приют{% endblock %}
 
 {% block content %}
@@ -9,6 +8,7 @@
         display: flex;
         justify-content: center;
         margin-top: 60px;
+        margin-bottom: 60px;
     }
 
     .auth-card {
@@ -40,6 +40,13 @@
         padding: 10px;
         border-radius: 6px;
         border: 1px solid #ccc;
+        box-sizing: border-box;
+    }
+
+    .optional-label {
+        font-size: 12px;
+        color: #999;
+        font-weight: normal;
     }
 
     .auth-card button {
@@ -79,6 +86,16 @@
         text-align: center;
         margin-top: 10px;
     }
+
+    .section-title {
+        font-size: 13px;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 20px 0 10px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+    }
 </style>
 
 <section class="auth-wrapper">
@@ -86,6 +103,8 @@
         <h2>Регистрация на приют</h2>
 
         <form id="shelterForm">
+
+            <div class="section-title">Информация за приюта</div>
 
             <div class="form-group">
                 <label for="name">Име на приюта</label>
@@ -98,7 +117,14 @@
             </div>
 
             <div class="form-group">
-                <label for="username">Име на потребител</label>
+                <label for="phone">Телефон <span class="optional-label">(незадължително)</span></label>
+                <input type="text" id="phone" placeholder="+359...">
+            </div>
+
+            <div class="section-title">Акаунт</div>
+
+            <div class="form-group">
+                <label for="username">Потребителско име</label>
                 <input type="text" id="username" required>
             </div>
 
@@ -130,20 +156,20 @@
 document.getElementById("shelterForm").addEventListener("submit", async function(e) {
     e.preventDefault();
 
+    const errorElement = document.getElementById("error");
+    const successElement = document.getElementById("success");
+    errorElement.innerText = "";
+    successElement.innerText = "";
+
     const name = document.getElementById("name").value.trim();
     const city = document.getElementById("city").value.trim();
+    const phone = document.getElementById("phone").value.trim();
     const username = document.getElementById("username").value.trim();
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
 
-    const errorElement = document.getElementById("error");
-    const successElement = document.getElementById("success");
-
-    errorElement.innerText = "";
-    successElement.innerText = "";
-
     if (!name || !city || !email || !password || !username) {
-        errorElement.innerText = "Всички полета са задължителни.";
+        errorElement.innerText = "Всички задължителни полета трябва да бъдат попълнени.";
         return;
     }
 
@@ -152,11 +178,7 @@ document.getElementById("shelterForm").addEventListener("submit", async function
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                name: name,
-                city: city,
-                username: username,
-                email: email,
-                password: password
+                name, city, phone: phone || null, username, email, password
             })
         });
 
@@ -167,11 +189,11 @@ document.getElementById("shelterForm").addEventListener("submit", async function
             return;
         }
 
-        successElement.innerText = "Приютът беше регистриран успешно!";
+        successElement.innerText = "Приютът беше регистриран успешно! Изчаква одобрение от администратор.";
 
         setTimeout(() => {
             window.location.href = "{{ url_for('login_page') }}";
-        }, 1500);
+        }, 2000);
 
     } catch (err) {
         errorElement.innerText = "Сървърна грешка.";

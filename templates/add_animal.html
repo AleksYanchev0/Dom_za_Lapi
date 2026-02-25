@@ -8,48 +8,153 @@
     display: flex;
     justify-content: center;
     margin-top: 50px;
+    margin-bottom: 50px;
 }
 
 .form-card {
-    width: 400px;
+    width: 480px;
     background: white;
-    padding: 25px;
+    padding: 30px;
     border-radius: 8px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.1);
 }
 
-.form-card input {
+.form-card h2 {
+    color: #27ae60;
+    margin-top: 0;
+}
+
+.form-card input,
+.form-card select {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
     border-radius: 6px;
     border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-card label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.checkbox-group input {
+    width: auto;
+    margin: 0;
 }
 
 .form-card button {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     background: #27ae60;
     border: none;
     border-radius: 6px;
     color: white;
+    font-size: 15px;
     cursor: pointer;
+    transition: background 0.3s;
+}
+
+.form-card button:hover {
+    background: #219150;
 }
 
 .error {
     color: red;
     text-align: center;
+    font-size: 14px;
+}
+
+.section-title {
+    font-size: 13px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 20px 0 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
 }
 </style>
 
 <div class="form-wrapper">
     <div class="form-card">
-        <h2>Добави животно</h2>
+        <h2>🐾 Добави животно</h2>
 
         <form id="animalForm">
-            <input type="text" id="name" placeholder="Име" required>
-            <input type="text" id="species" placeholder="Вид" required>
-            <button type="submit">Добави</button>
+
+            <div class="section-title">Основна информация</div>
+
+            <label>Име</label>
+            <input type="text" id="name" placeholder="Рекс, Мими..." required>
+
+            <label>Вид</label>
+            <select id="species" required>
+                <option value="" disabled selected>Избери вид</option>
+                <option value="куче">Куче</option>
+                <option value="котка">Котка</option>
+                <option value="заек">Заек</option>
+                <option value="птица">Птица</option>
+                <option value="друго">Друго</option>
+            </select>
+
+            <label>Порода (незадължително)</label>
+            <input type="text" id="breed" placeholder="Лабрадор, Хъски...">
+
+            <div class="section-title">Детайли</div>
+
+            <label>Възраст</label>
+            <select id="age">
+                <option value="" disabled selected>Избери възраст</option>
+                <option value="бебе">Бебе</option>
+                <option value="млад">Млад</option>
+                <option value="възрастен">Възрастен</option>
+                <option value="стар">Стар</option>
+            </select>
+
+            <label>Размер</label>
+            <select id="size">
+                <option value="" disabled selected>Избери размер</option>
+                <option value="малък">Малък</option>
+                <option value="среден">Среден</option>
+                <option value="голям">Голям</option>
+            </select>
+
+            <label>Пол</label>
+            <select id="gender">
+                <option value="" disabled selected>Избери пол</option>
+                <option value="мъжки">Мъжки</option>
+                <option value="женски">Женски</option>
+            </select>
+
+            <label>Статус</label>
+            <select id="status">
+                <option value="available">Достъпен за осиновяване</option>
+                <option value="adopted">Осиновен</option>
+                <option value="in treatment">На лечение</option>
+            </select>
+
+            <div class="section-title">Снимка и ваксинация</div>
+
+            <label>Снимка (URL, незадължително)</label>
+            <input type="text" id="photo_url" placeholder="https://...">
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="vaccinated">
+                <label for="vaccinated" style="margin:0;">Ваксинирано</label>
+            </div>
+
+            <button type="submit">Добави животно</button>
         </form>
 
         <p id="error" class="error"></p>
@@ -76,7 +181,14 @@ document.getElementById("animalForm").addEventListener("submit", async function(
         },
         body: JSON.stringify({
             name: document.getElementById("name").value,
-            species: document.getElementById("species").value
+            species: document.getElementById("species").value,
+            breed: document.getElementById("breed").value || null,
+            age: document.getElementById("age").value || null,
+            size: document.getElementById("size").value || null,
+            gender: document.getElementById("gender").value || null,
+            status: document.getElementById("status").value,
+            vaccinated: document.getElementById("vaccinated").checked,
+            photo_url: document.getElementById("photo_url").value || null
         })
     });
 
@@ -99,4 +211,3 @@ document.getElementById("animalForm").addEventListener("submit", async function(
 </script>
 
 {% endblock %}
-
