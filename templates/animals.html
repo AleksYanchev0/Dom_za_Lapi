@@ -5,8 +5,8 @@
 
 <style>
 .animals-container {
-    max-width: 900px;
-    margin: 40px auto;
+    max-width: 1200px;
+    margin: 20px auto;
 }
 
 .animals-header {
@@ -18,6 +18,7 @@
 
 .animals-header h2 {
     margin: 0;
+    color: #2c3e50;
 }
 
 .add-btn {
@@ -34,55 +35,380 @@
     background-color: #219150;
 }
 
-.animal-card {
+/* Filter Section */
+.filter-section {
     background: white;
-    padding: 18px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    padding: 20px 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
 }
 
-.animal-card strong {
-    font-size: 18px;
+.filter-section h3 {
+    margin: 0 0 15px;
+    color: #2c3e50;
+    font-size: 16px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.filter-grid input,
+.filter-grid select {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.filter-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-search {
+    background-color: #27ae60;
+    color: white;
+}
+
+.btn-search:hover {
+    background-color: #219150;
+}
+
+.btn-clear {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.btn-clear:hover {
+    background-color: #7f8c8d;
+}
+
+/* Animal Grid */
+.animal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.animal-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.animal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.animal-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.animal-card-placeholder {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #eafaf1 0%, #d5f0dd 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+}
+
+.animal-card-body {
+    padding: 18px;
+}
+
+.animal-card-body h3 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    color: #2c3e50;
+}
+
+.animal-species {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.animal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tag {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.tag-status-available {
+    background: #eafaf1;
+    color: #27ae60;
+}
+
+.tag-status-adopted {
+    background: #fef9e7;
+    color: #d4ac0d;
+}
+
+.tag-gender {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.tag-vaccinated {
+    background: #eaf4fb;
+    color: #2980b9;
+}
+
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #95a5a6;
+}
+
+.no-results-icon {
+    font-size: 60px;
+    margin-bottom: 15px;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #95a5a6;
 }
 </style>
 
 <section class="animals-container">
 
     <div class="animals-header">
-        <h2>Всички животни</h2>
-
-       
+        <h2>🐾 Животни за осиновяване</h2>
         <a href="/animals/add" id="addAnimalBtn" class="add-btn">
             + Добави животно
         </a>
     </div>
 
-    {% if animals %}
-        {% for animal in animals %}
-            <div class="animal-card">
-                <strong>{{ animal.name }}</strong><br>
-                Вид: {{ animal.species }}
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>Няма добавени животни.</p>
-    {% endif %}
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <h3>🔍 Търси и филтрирай</h3>
+        <div class="filter-grid">
+            <input type="text" id="filterName" placeholder="Име на животно">
+            <select id="filterSpecies">
+                <option value="">Всички видове</option>
+                <option value="куче">Куче</option>
+                <option value="котка">Котка</option>
+                <option value="заек">Заек</option>
+                <option value="птица">Птица</option>
+                <option value="друго">Друго</option>
+            </select>
+            <input type="text" id="filterBreed" placeholder="Порода">
+            <select id="filterSize">
+                <option value="">Всички размери</option>
+                <option value="малък">Малък</option>
+                <option value="среден">Среден</option>
+                <option value="голям">Голям</option>
+            </select>
+            <select id="filterGender">
+                <option value="">Всички полове</option>
+                <option value="мъжки">Мъжки</option>
+                <option value="женски">Женски</option>
+            </select>
+            <select id="filterStatus">
+                <option value="">Всички статуси</option>
+                <option value="available">Достъпен</option>
+                <option value="adopted">Осиновен</option>
+                <option value="in treatment">На лечение</option>
+            </select>
+            <select id="filterVaccinated">
+                <option value="">Ваксинация</option>
+                <option value="true">Само ваксинирани</option>
+                <option value="false">Само неваксинирани</option>
+            </select>
+        </div>
+        <div class="filter-buttons">
+            <button class="btn-search" onclick="searchAnimals()">Търси</button>
+            <button class="btn-clear" onclick="clearFilters()">Изчисти</button>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div id="loadingMsg" class="loading" style="display:none;">Зареждане...</div>
+    
+    <div id="animalGrid" class="animal-grid">
+        <!-- Animals will be loaded here -->
+    </div>
+
+    <div id="noResults" class="no-results" style="display:none;">
+        <div class="no-results-icon">🔍</div>
+        <h3>Няма намерени животни</h3>
+        <p>Опитайте с други филтри</p>
+    </div>
 
 </section>
 
 <script>
-
+// Check if user is logged in for add animal button
 document.getElementById("addAnimalBtn").addEventListener("click", function(e) {
     const token = localStorage.getItem("access_token");
-
     if (!token) {
         e.preventDefault();
         alert("Трябва да сте логнати, за да добавите животно.");
         window.location.href = "/login";
     }
 });
+
+// Load animals on page load
+window.addEventListener('DOMContentLoaded', function() {
+    loadAnimals();
+});
+
+async function loadAnimals(filters = {}) {
+    const loadingMsg = document.getElementById('loadingMsg');
+    const animalGrid = document.getElementById('animalGrid');
+    const noResults = document.getElementById('noResults');
+    
+    loadingMsg.style.display = 'block';
+    animalGrid.innerHTML = '';
+    noResults.style.display = 'none';
+    
+    // Build query string
+    const params = new URLSearchParams();
+    if (filters.name) params.append('name', filters.name);
+    if (filters.species) params.append('species', filters.species);
+    if (filters.breed) params.append('breed', filters.breed);
+    if (filters.size) params.append('size', filters.size);
+    if (filters.gender) params.append('gender', filters.gender);
+    if (filters.status) params.append('status', filters.status);
+    if (filters.vaccinated) params.append('vaccinated', filters.vaccinated);
+    
+    try {
+        const response = await fetch('/animals?' + params.toString());
+        const data = await response.json();
+        
+        loadingMsg.style.display = 'none';
+        
+        if (!data.success || data.data.length === 0) {
+            noResults.style.display = 'block';
+            return;
+        }
+        
+        // Render animals
+        data.data.forEach(animal => {
+            const card = createAnimalCard(animal);
+            animalGrid.appendChild(card);
+        });
+        
+    } catch (error) {
+        console.error('Error loading animals:', error);
+        loadingMsg.style.display = 'none';
+        noResults.style.display = 'block';
+    }
+}
+
+function createAnimalCard(animal) {
+    const card = document.createElement('a');
+    card.href = `/animals/${animal.id}?view=html`;
+    card.className = 'animal-card';
+    
+    const imageHtml = animal.photo_url
+        ? `<img src="${animal.photo_url}" alt="${animal.name}" class="animal-card-image">`
+        : `<div class="animal-card-placeholder">🐾</div>`;
+    
+    const breedText = animal.breed ? ` · ${animal.breed}` : '';
+    
+    const tags = [];
+    
+    // Status tag
+    if (animal.status === 'available') {
+        tags.push('<span class="tag tag-status-available">✅ Достъпен</span>');
+    } else if (animal.status === 'adopted') {
+        tags.push('<span class="tag tag-status-adopted">🏠 Осиновен</span>');
+    }
+    
+    // Gender tag
+    if (animal.gender) {
+        const genderIcon = animal.gender === 'мъжки' ? '♂' : '♀';
+        tags.push(`<span class="tag tag-gender">${genderIcon} ${animal.gender}</span>`);
+    }
+    
+    // Vaccinated tag
+    if (animal.vaccinated) {
+        tags.push('<span class="tag tag-vaccinated">💉 Ваксиниран</span>');
+    }
+    
+    card.innerHTML = `
+        ${imageHtml}
+        <div class="animal-card-body">
+            <h3>${animal.name}</h3>
+            <div class="animal-species">${animal.species}${breedText}</div>
+            <div class="animal-tags">
+                ${tags.join('')}
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+function searchAnimals() {
+    const filters = {
+        name: document.getElementById('filterName').value.trim(),
+        species: document.getElementById('filterSpecies').value,
+        breed: document.getElementById('filterBreed').value.trim(),
+        size: document.getElementById('filterSize').value,
+        gender: document.getElementById('filterGender').value,
+        status: document.getElementById('filterStatus').value,
+        vaccinated: document.getElementById('filterVaccinated').value
+    };
+    
+    loadAnimals(filters);
+}
+
+function clearFilters() {
+    document.getElementById('filterName').value = '';
+    document.getElementById('filterSpecies').value = '';
+    document.getElementById('filterBreed').value = '';
+    document.getElementById('filterSize').value = '';
+    document.getElementById('filterGender').value = '';
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterVaccinated').value = '';
+    
+    loadAnimals();
+}
+
+// Allow Enter key to search
+document.querySelectorAll('.filter-grid input, .filter-grid select').forEach(element => {
+    element.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchAnimals();
+        }
+    });
+});
 </script>
 
 {% endblock %}
-

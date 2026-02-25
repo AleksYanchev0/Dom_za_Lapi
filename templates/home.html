@@ -3,7 +3,118 @@
 {% block title %}Начало{% endblock %}
 
 {% block content %}
-<h1>Добре дошли в Dom za Lapi 🐾</h1>
-<p>Платформа за приюти, животни и сигнали.</p>
-{% endblock %}
 
+<style>
+.hero-section {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #eafaf1 0%, #d5f0dd 100%);
+    border-radius: 15px;
+    margin-bottom: 40px;
+}
+
+.hero-section h1 {
+    font-size: 42px;
+    color: #27ae60;
+    margin: 0 0 15px;
+}
+
+.hero-section p {
+    font-size: 18px;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cta-btn {
+    padding: 12px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-primary {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-secondary {
+    background: white;
+    color: #27ae60;
+    border: 2px solid #27ae60;
+}
+
+.features-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 40px;
+}
+
+.feature-card {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.feature-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+.feature-card h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.feature-card p {
+    color: #7f8c8d;
+    line-height: 1.6;
+}
+</style>
+
+<div class="hero-section">
+    <h1>🐾 Добре дошли в Dom za Lapi</h1>
+    <p>Платформа за осиновяване на животни, регистрация на приюти и подаване на сигнали</p>
+    <div class="cta-buttons">
+        <a href="/animals?view=html" class="cta-btn btn-primary">Виж животните</a>
+        <a href="/shelters?view=html" class="cta-btn btn-secondary">Виж приютите</a>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="feature-card">
+        <div class="feature-icon">🐕</div>
+        <h3>Осинови животно</h3>
+        <p>Намери своя нов четириног приятел сред стотици животни, които чакат своя дом</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">🏠</div>
+        <h3>Приюти</h3>
+        <p>Открий приюти в твоя град и виж какви животни се нуждаят от грижи</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">🚨</div>
+        <h3>Подай сигнал</h3>
+        <p>Виждаш животно в беда? Подай сигнал и помогни да получи нужната помощ</p>
+    </div>
+</div>
+
+{% endblock %}
