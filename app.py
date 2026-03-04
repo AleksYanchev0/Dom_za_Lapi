@@ -120,6 +120,7 @@ def create_shelter():
         city=data["city"],
         phone=data.get("phone"),
         email=data.get("email"),
+        photo_url=data.get("photo_url"),
         owner_id=user.id
     )
     db.session.add(shelter)
