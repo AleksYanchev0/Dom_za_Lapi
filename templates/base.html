@@ -93,7 +93,6 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Base script runs FIRST — sets window.token and window.user -->
     <script>
         window.token = localStorage.getItem("access_token");
         window.user = JSON.parse(localStorage.getItem("user") || "null");
@@ -114,7 +113,6 @@
         }
     </script>
 
-    <!-- Page-specific scripts run AFTER window.token/user are set -->
     {% block scripts %}{% endblock %}
 
 </body>

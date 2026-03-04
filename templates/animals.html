@@ -272,7 +272,6 @@
 </section>
 
 <script>
-// Check if user is logged in for add animal button
 document.getElementById("addAnimalBtn").addEventListener("click", function(e) {
     // const token = localStorage.getItem("access_token");
     if (!token) {
@@ -282,7 +281,6 @@ document.getElementById("addAnimalBtn").addEventListener("click", function(e) {
     }
 });
 
-// Load animals on page load
 window.addEventListener('DOMContentLoaded', function() {
     loadAnimals();
 });
@@ -296,7 +294,6 @@ async function loadAnimals(filters = {}) {
     animalGrid.innerHTML = '';
     noResults.style.display = 'none';
     
-    // Build query string
     const params = new URLSearchParams();
     if (filters.name) params.append('name', filters.name);
     if (filters.species) params.append('species', filters.species);
@@ -317,7 +314,6 @@ async function loadAnimals(filters = {}) {
             return;
         }
         
-        // Render animals
         data.data.forEach(animal => {
             const card = createAnimalCard(animal);
             animalGrid.appendChild(card);
@@ -343,20 +339,17 @@ function createAnimalCard(animal) {
     
     const tags = [];
     
-    // Status tag
     if (animal.status === 'available') {
         tags.push('<span class="tag tag-status-available">✅ Достъпен</span>');
     } else if (animal.status === 'adopted') {
         tags.push('<span class="tag tag-status-adopted">🏠 Осиновен</span>');
     }
     
-    // Gender tag
     if (animal.gender) {
         const genderIcon = animal.gender === 'мъжки' ? '♂' : '♀';
         tags.push(`<span class="tag tag-gender">${genderIcon} ${animal.gender}</span>`);
     }
     
-    // Vaccinated tag
     if (animal.vaccinated) {
         tags.push('<span class="tag tag-vaccinated">💉 Ваксиниран</span>');
     }
@@ -401,7 +394,6 @@ function clearFilters() {
     loadAnimals();
 }
 
-// Allow Enter key to search
 document.querySelectorAll('.filter-grid input, .filter-grid select').forEach(element => {
     element.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
