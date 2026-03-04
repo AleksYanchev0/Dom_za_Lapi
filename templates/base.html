@@ -96,8 +96,12 @@
     </div>
 
     <script>
-        const token = localStorage.getItem("access_token");
-        const user = JSON.parse(localStorage.getItem("user") || "null");
+        //globalen obekt za cqlata stranica pravim token i user global
+        window.token = localStorage.getItem("access_token");
+        window.user = JSON.parse(localStorage.getItem("user") || "null");
+        
+        const token = window.token;
+        const user = window.user;
 
         if (token && user) {
             document.getElementById("loginBtn").style.display = "none";
