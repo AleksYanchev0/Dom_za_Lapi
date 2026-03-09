@@ -69,7 +69,9 @@
 
     <nav class="navbar">
         <div class="nav-left">
-            <a href="/" class="nav-logo">🐾 Dom za Lapi</a>
+            <a href="/" class="nav-logo" title="Dom za Lapi">
+                <img src="/static/logo.png" alt="Dom za Lapi" style="height: 76px;">
+            </a>
         </div>
 
         <div class="nav-center">
@@ -79,9 +81,7 @@
         </div>
 
         <div class="nav-right">
-           
             <a href="/login" class="login-btn" id="loginBtn">Влизане</a>
-            
             <span id="userInfo" style="display:none; align-items:center; gap:15px;">
                 <span id="usernameDisplay" style="font-weight:500;"></span>
                 <a href="#" class="login-btn" onclick="logout()">Изход</a>
@@ -94,8 +94,11 @@
     </div>
 
     <script>
-        const token = localStorage.getItem("access_token");
-        const user = JSON.parse(localStorage.getItem("user") || "null");
+        window.token = localStorage.getItem("access_token");
+        window.user = JSON.parse(localStorage.getItem("user") || "null");
+
+        const token = window.token;
+        const user = window.user;
 
         if (token && user) {
             document.getElementById("loginBtn").style.display = "none";
@@ -109,6 +112,8 @@
             window.location.href = "/";
         }
     </script>
+
+    {% block scripts %}{% endblock %}
 
 </body>
 </html>
