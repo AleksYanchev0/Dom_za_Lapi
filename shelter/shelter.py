@@ -158,3 +158,55 @@ def decline_shelter(shelter_id):
     db.session.commit()
 
     return {"success": True, "message": f"{shelter.name} declined and removed"}
+
+@shelter_bp.route("/shelters/me", methods=["GET"])
+@jwt_required()
+def get_my_shelter():
+    user_id = get_jwt_identity()
+    user = User.query.get(int(user_id))
+
+    if not user or user.role != "shelter":
+        return {"success": False, "error": "Access denied"}, 403
+
+    shelter = Shelter.query.filter_by(owner_id=user.id).first()
+    if not shelter:
+        return {"success": False, "error": "Shelter not found"}, 404
+
+    return {
+        "success": True,
+        "data": {
+            "id": shelter.id,
+            "name": shelter.name,
+            "city": shelter.city,
+            "phone": shelter.phone,
+            "email": shelter.email,
+            "photo_url": shelter.photo_url
+        }
+    }, 200
+
+@shelter_bp.route("/shelters/me", methods=["PATCH"])
+@jwt_required()
+def update_my_shelter():
+    user_id = get_jwt_identity()
+    user = User.query.get(int(user_id))
+
+    if not user or user.role != "shelter":
+        return {"success": False, "error": "Access denied"}, 403
+
+    shelter = Shelter.query.filter_by(owner_id=user.id).first()
+    if not shelter:
+        return {"success": False, "error": "Shelter not found"}, 404
+
+    data = request.get_json()
+    if not data:
+        return {"success": False, "error": "Missing JSON body"}, 400
+
+    if data.get("name"):
+        shelter.name = data.get("name")
+    if data.get("city"):
+        shelter.city = data.get("city")
+    if data.get("phone"):
+        shelter.phone = data.get("phone")
+
+    db.session.commit()
+    return {"success": True, "message": "Shelter updated"}, 200

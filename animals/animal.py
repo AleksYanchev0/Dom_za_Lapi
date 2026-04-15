@@ -103,9 +103,6 @@ def create_animal():
     if not data:
         return {"success": False, "error": "Missing JSON body"}, 400
 
-    if user.role not in ["user", "shelter"]:
-        return {"success": False, "error": "Not allowed to add animals"}, 403
-
     name = data.get("name")
     species = data.get("species")
 
@@ -128,7 +125,8 @@ def create_animal():
         status=data.get("status", "available"),
         vaccinated=data.get("vaccinated", False),
         photo_url=data.get("photo_url"),
-        shelter_id=shelter_id
+        shelter_id=shelter_id,
+        user_id = user.id
     )
 
     db.session.add(animal)
@@ -141,7 +139,8 @@ def create_animal():
             "name": animal.name,
             "species": animal.species,
             "breed": animal.breed,
-            "shelter_id": animal.shelter_id
+            "shelter_id": animal.shelter_id,
+            "user_id": animal.user_id
         }
     }, 201
 

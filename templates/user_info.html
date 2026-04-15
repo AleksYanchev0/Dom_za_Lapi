@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% block title %}Настройки на профила{% endblock %}
+
+{% block content %}
+<style>
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .section {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .section-title {
+        color: #27ae60;
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 20px;
+    }
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .section-title-inline {
+        color: #27ae60;
+        margin: 0;
+        font-size: 20px;
+    }
+    .badge {
+        background: #eafaf1;
+        color: #27ae60;
+        border: 1px solid #27ae60;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    .form-group { margin-bottom: 18px; }
+    .label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
+    .input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    .input:focus { border-color: #27ae60; outline: none; }
+    .btn {
+        padding: 11px 24px;
+        background: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn:hover { background: #219150; }
+    .message { margin-top: 12px; font-size: 14px; }
+    .message.success { color: #27ae60; }
+    .message.error { color: red; }
+    .delete-btn {
+        padding: 11px 24px;
+        background: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .delete-btn:hover { background: #c0392b; }
+</style>
+
+<!-- Section 1: Profile Info -->
+<section class="section">
+    <h2 class="section-title">Основна информация</h2>
+    <form id="profileForm">
+        <div class="form-group">
+            <label class="label">Имейл адрес</label>
+            <input type="email" id="email" class="input" placeholder="example@email.com"/>
+        </div>
+        <div class="form-group">
+            <label class="label">Телефонен номер</label>
+            <input type="tel" id="phone" class="input" placeholder="+359 888 123 456"/>
+        </div>
+        <div class="form-group">
+            <label class="label">Потребителско име</label>
+            <input type="text" id="username" class="input" placeholder="username"/>
+        </div>
+        <button type="submit" class="btn">Запази промените</button>
+    </form>
+    <p id="profileMsg" class="message"></p>
+</section>
+
+<!-- Section 2: Change Password -->
+<section class="section">
+    <h2 class="section-title">Смяна на парола</h2>
+    <form id="passwordForm">
+        <div class="form-group">
+            <label class="label">Текуща парола</label>
+            <input type="password" id="current-password" class="input" placeholder="••••••••"/>
+        </div>
+        <div class="form-group">
+            <label class="label">Нова парола</label>
+            <input type="password" id="new-password" class="input" placeholder="••••••••"/>
+        </div>
+        <div class="form-group">
+            <label class="label">Потвърди новата парола</label>
+            <input type="password" id="confirm-password" class="input" placeholder="••••••••"/>
+        </div>
+        <button type="submit" class="btn">Смени парола</button>
+    </form>
+    <p id="passwordMsg" class="message"></p>
+</section>
+
+<!-- Section 3: Shelter only — hidden by default -->
+<section class="section" id="shelterSection" style="display:none;">
+    <div class="section-header">
+        <h2 class="section-title-inline">Настройки на приюта</h2>
+        <span class="badge">Само за приюти</span>
+    </div>
+    <form id="shelterForm">
+        <div class="form-group">
+            <label class="label">Име на приюта</label>
+            <input type="text" id="shelter-name" class="input" placeholder="Приют за животни"/>
+        </div>
+        <div class="form-group">
+            <label class="label">Град</label>
+            <input type="text" id="shelter-city" class="input" placeholder="София"/>
+        </div>
+        <div class="form-group">
+            <label class="label">Телефон на приюта</label>
+            <input type="tel" id="shelter-phone" class="input" placeholder="+359 888 123 456"/>
+        </div>
+        <button type="submit" class="btn">Запази промените</button>
+    </form>
+    <p id="shelterMsg" class="message"></p>
+</section>
+
+<!-- Section 4: Delete account -->
+<section class="section">
+    <h2 class="section-title" style="color: #e74c3c;">Изтриване на акаунт</h2>
+    <p style="color: #666; font-size: 14px;">Това действие е необратимо. Всички твои животни и сигнали ще бъдат изтрити.</p>
+    <button class="delete-btn" onclick="deleteAccount()">Изтрий акаунта</button>
+    <p id="deleteMsg" class="message"></p>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const token = window.token
+    const user = window.user
+
+    // redirect if not logged in
+    if (!token || !user) {
+        window.location.href = "/login"
+    }
+
+    // show shelter section if shelter role
+    if (user && user.role === "shelter") {
+        document.getElementById("shelterSection").style.display = "block"
+        loadShelterInfo()
+    }
+
+    // load current user info into form
+    async function loadUserInfo() {
+        const res = await fetch("/users/me", {
+            headers: { "Authorization": "Bearer " + token }
+        })
+        const data = await res.json()
+        if (data.success) {
+            document.getElementById("email").value = data.data.email || ""
+            document.getElementById("phone").value = data.data.phone || ""
+            document.getElementById("username").value = data.data.username || ""
+        }
+    }
+
+    // load shelter info
+    async function loadShelterInfo() {
+        const res = await fetch("/shelters/me", {
+            headers: { "Authorization": "Bearer " + token }
+        })
+        const data = await res.json()
+        if (data.success) {
+            document.getElementById("shelter-name").value = data.data.name || ""
+            document.getElementById("shelter-city").value = data.data.city || ""
+            document.getElementById("shelter-phone").value = data.data.phone || ""
+        }
+    }
+
+    loadUserInfo()
+
+    // profile form
+    document.getElementById("profileForm").addEventListener("submit", async function(e) {
+        e.preventDefault()
+        const msg = document.getElementById("profileMsg")
+
+        const res = await fetch("/users/me", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({
+                email: document.getElementById("email").value,
+                phone: document.getElementById("phone").value,
+                username: document.getElementById("username").value
+            })
+        })
+
+        const data = await res.json()
+        msg.className = data.success ? "message success" : "message error"
+        msg.innerText = data.success ? "Профилът е обновен!" : (data.error || "Грешка.")
+
+        // update username in navbar
+        if (data.success) {
+            const storedUser = JSON.parse(localStorage.getItem("user"))
+            storedUser.username = document.getElementById("username").value
+            localStorage.setItem("user", JSON.stringify(storedUser))
+            document.getElementById("usernameDisplay").innerText = storedUser.username
+        }
+    })
+
+    // password form
+    document.getElementById("passwordForm").addEventListener("submit", async function(e) {
+        e.preventDefault()
+        const msg = document.getElementById("passwordMsg")
+
+        const newPass = document.getElementById("new-password").value
+        const confirmPass = document.getElementById("confirm-password").value
+
+        if (newPass !== confirmPass) {
+            msg.className = "message error"
+            msg.innerText = "Паролите не съвпадат."
+            return
+        }
+
+        const res = await fetch("/users/me/password", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({
+                current_password: document.getElementById("current-password").value,
+                new_password: newPass
+            })
+        })
+
+        const data = await res.json()
+        msg.className = data.success ? "message success" : "message error"
+        msg.innerText = data.success ? "Паролата е сменена!" : (data.error || "Грешка.")
+
+        if (data.success) document.getElementById("passwordForm").reset()
+    })
+
+    // shelter form
+    document.getElementById("shelterForm").addEventListener("submit", async function(e) {
+        e.preventDefault()
+        const msg = document.getElementById("shelterMsg")
+
+        const res = await fetch("/shelters/me", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({
+                name: document.getElementById("shelter-name").value,
+                city: document.getElementById("shelter-city").value,
+                phone: document.getElementById("shelter-phone").value
+            })
+        })
+
+        const data = await res.json()
+        msg.className = data.success ? "message success" : "message error"
+        msg.innerText = data.success ? "Приютът е обновен!" : (data.error || "Грешка.")
+    })
+
+    // delete account
+    async function deleteAccount() {
+        if (!confirm("Сигурен ли си? Това ще изтрие акаунта ти и всичко свързано с него.")) return
+
+        const res = await fetch("/users/me", {
+            method: "DELETE",
+            headers: { "Authorization": "Bearer " + token }
+        })
+
+        const data = await res.json()
+        if (data.success) {
+            localStorage.removeItem("access_token")
+            localStorage.removeItem("user")
+            window.location.href = "/"
+        } else {
+            document.getElementById("deleteMsg").className = "message error"
+            document.getElementById("deleteMsg").innerText = data.error || "Грешка."
+        }
+    }
+</script>
+{% endblock %}

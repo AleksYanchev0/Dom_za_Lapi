@@ -11,10 +11,14 @@ class User(db.Model):
     username = db.Column(db.String(40), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    phone = db.Column(db.String(20), nullable=True)
     role = db.Column(db.String(20), default="user")
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    reports = db.relationship('Report', backref='user', lazy=True)
-    
+
+    reports = db.relationship('Report', backref='user', lazy=True, cascade="all, delete-orphan")
+    animals = db.relationship('Animal', foreign_keys='Animal.user_id', backref='owner', lazy=True, cascade="all, delete-orphan")
+    shelters = db.relationship('Shelter', foreign_keys='Shelter.owner_id', backref='owner', lazy=True, cascade="all, delete-orphan")
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
         
@@ -32,10 +36,10 @@ class Shelter(db.Model):
     email = db.Column(db.String(120), nullable=True)
     photo_url = db.Column(db.String(500), nullable=True)
     
-    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     is_approved = db.Column(db.Boolean, default=False)
     
-    animals = db.relationship("Animal", backref="shelter", lazy=True)
+    animals = db.relationship("Animal", foreign_keys='Animal.shelter_id', backref="shelter", lazy=True, cascade="all, delete-orphan")
 
 
 class Animal(db.Model):
@@ -52,7 +56,8 @@ class Animal(db.Model):
     vaccinated = db.Column(db.Boolean, default=False)
     photo_url = db.Column(db.String(500), nullable=True)
     
-    shelter_id = db.Column(db.Integer, db.ForeignKey("shelters.id"))
+    shelter_id = db.Column(db.Integer, db.ForeignKey("shelters.id"), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
 
 
 class Report(db.Model):
@@ -62,4 +67,4 @@ class Report(db.Model):
     text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     status = db.Column(db.String(50), default='pending')
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
