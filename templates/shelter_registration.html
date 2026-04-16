@@ -162,7 +162,7 @@
 
         <div class="auth-footer">
             <p>Искаш стандартен акаунт?
-                <a href="{{ url_for('register_page') }}">Регистрирай се тук.</a>
+                <a href="{{ url_for('auth.register_page') }}">Регистрирай се тук.</a>
             </p>
         </div>
     </article>
@@ -207,7 +207,7 @@ document.getElementById("shelterForm").addEventListener("submit", async function
     }
 
     try {
-        const res = await fetch("{{ url_for('create_shelter') }}", {
+        const res = await fetch("{{ url_for('shelter.create_shelter') }}", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -225,7 +225,7 @@ document.getElementById("shelterForm").addEventListener("submit", async function
         successElement.innerText = "Приютът беше регистриран успешно! Изчаква одобрение от администратор.";
 
         setTimeout(() => {
-            window.location.href = "{{ url_for('login_page') }}";
+            window.location.href = "{{ url_for('auth.login_page') }}";
         }, 2000);
 
     } catch (err) {
